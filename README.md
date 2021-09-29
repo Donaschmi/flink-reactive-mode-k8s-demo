@@ -3,35 +3,23 @@
 
 ```
 # build image
-docker build -t rmetzger/flink:1.13.0-reactive-demo .
+docker build -t donaschmitz/flink:1.13.0-reactive-demo .
 
 # publish image
-docker push rmetzger/flink:1.13.0-reactive-demo
+docker push donaschmitz/flink:1.13.0-reactive-demo
 
 
-brew install minikube
 
-# if existing install is broken:
-brew unlink minikube
-brew link minikube
-
-# start minikube
-minikube start
+sudo snap install kubectl --classic
+sudo snap install helm --classic
 
 
-# some prep
-minikube ssh 'sudo ip link set docker0 promisc on'
-
-# optional dashboard on Minikube
-minikube dashboard
-# dashboard on real cluster
-kubectl proxy
-http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
-kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
-
+# start kind
+kind create cluster
 
 # install metrics server (needed for autoscaler)
-minikube addons enable metrics-server
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
+kubectl patch deployment metrics-server -n kube-system -p '{"spec":{"template":{"spec":{"containers":[{"name":"metrics-server","args":["--cert-dir=/tmp", "--secure-port=4443", "--kubelet-insecure-tls","--kubelet-preferred-address-types=InternalIP"]}]}}}}'
 
 kubectl create namespace reactive
 kubectl config set-context --current --namespace=reactive
@@ -77,7 +65,7 @@ kubectl exec --stdin --tty workbench -- bash
 # prep
 apt update
 apt install -y maven git htop nano iputils-ping wget net-tools
-git clone https://github.com/rmetzger/flink-reactive-mode-k8s-demo.git
+git clone https://github.com/donaschmi/flink-reactive-mode-k8s-demo.git
 mvn clean install
 
 # run data generator
@@ -86,8 +74,12 @@ mvn exec:java -Dexec.mainClass="org.apache.flink.DataGen" -Dexec.args="topic 1 k
 # delete workbench
 kubectl delete pod workbench
 
+export JOB_POD_NAME=$(kubectl get pods --namespace reactive -l "app=flink,component=jobmanager" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward $JOB_POD_NAME 8081:8081
+
 # make kafka available locally:
-kubectl port-forward kafka-broker0-78fb8799f7-twdf6 9092:9092
+export KAFKA_POD_NAME=$(kubectl get pods --namespace reactive -l "app=kafka" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward $KAFKA_POD_NAME 9092:9092
 
 
 # scale automatically
@@ -98,9 +90,11 @@ kubectl delete horizontalpodautoscalers flink-taskmanager
 
 
 # prometheus
-kubectl port-forward prometheus-server-667df6d57c-77dms 9090
+export PROM_POD_NAME=$(kubectl get pods --namespace reactive -l "app=prometheus,component=server" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward $PROM_POD_NAME 9090
 # grafana
-kubectl port-forward grafana-5df66b4d87-rkd7n 3000
+export GRAFANA_POD_NAME=$(kubectl get pods --namespace reactive -l "app.kubernetes.io/instance=grafana,app.kubernetes.io/name=grafana" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward $GRAFANA_POD_NAME 3000
 
 
 # scales:
