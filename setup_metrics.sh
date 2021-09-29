@@ -31,7 +31,7 @@ install_grafana() {
     --set-file dashboards.default.flink-dashboard.json=grafana-dashboard.json
 }
 
-#install_prometheus
+install_prometheus
 
 helm uninstall grafana
 install_grafana

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: taskmanager
-        image: rmetzger/flink:1.13.0-reactive-demo
+        image: donaschmitz/flink:1.13.0-reactive-demo
         imagePullPolicy: Always
         resources:
           requests:
