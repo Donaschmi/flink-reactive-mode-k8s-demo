@@ -1,5 +1,9 @@
 #!/bin/bash
+ 
+kubectl create namespace reactive
+kubectl config set-context --current --namespace=reactive
 
+kubectl apply -f zookeeper-service.yaml
 kubectl apply -f zookeeper-deployment.yaml
 
 kubectl apply -f kafka-service.yaml
@@ -15,3 +19,5 @@ echo "Waiting for everything to be ready"
 
   kubectl wait --timeout=5m --for=condition=available deployments --all
   kubectl wait --timeout=5m --for=condition=ready pods --all
+   
+kubectl autoscale deployment flink-taskmanager --min=1 --max=15 --cpu-percent=35

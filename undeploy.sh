@@ -1,5 +1,6 @@
 #!/bin/bash
 
+kubectl delete --wait=true -f zookeeper-service.yaml
 kubectl delete --wait=true -f zookeeper-deployment.yaml
 
 kubectl delete --wait=true -f kafka-service.yaml
@@ -12,3 +13,5 @@ kubectl delete --wait=true -f jobmanager-service.yaml
 kubectl delete --wait=true -f taskmanager-job-deployment.yaml
 
 kubectl delete --wait=true horizontalpodautoscalers flink-taskmanager
+
+kubectl delete --wait=true job data-injector
