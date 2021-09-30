@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: data-injector
+spec:
+  template:
+    spec:
+      containers:
+      - name: data-injector
+        image: donaschmitz/flink-data-injector:latest
+        #command: ["mvn", "exec:java", "-Dexec.mainClass='org.apache.flink.DataGen'", "-Dexec.args='topic 1 kafka-service:9092 cos'"]
+      restartPolicy: Never
+  backoffLimit: 4
