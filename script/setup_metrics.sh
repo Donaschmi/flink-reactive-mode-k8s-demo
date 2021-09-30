@@ -1,6 +1,7 @@
 #!/bin/bash
 
 HELM=${HELM:-helm}
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 
 helm_install() {
@@ -21,14 +22,14 @@ export VVP_NAMESPACE="reactive"
 install_prometheus() {
   helm_install prometheus prometheus "$VVP_NAMESPACE" \
     --repo https://prometheus-community.github.io/helm-charts \
-    --values values-prometheus.yaml
+    --values $SCRIPT_DIR/values-prometheus.yaml
 }
 
 install_grafana() {
   helm_install grafana grafana "$VVP_NAMESPACE" \
     --repo https://grafana.github.io/helm-charts \
-    --values values-grafana.yaml \
-    --set-file dashboards.default.flink-dashboard.json=grafana-dashboard.json
+    --values $SCRIPT_DIR/values-grafana.yaml \
+    --set-file dashboards.default.flink-dashboard.json=$SCRIPT_DIR/grafana-dashboard.json
 }
 
 install_prometheus
