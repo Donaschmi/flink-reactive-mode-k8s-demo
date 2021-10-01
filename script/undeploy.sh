@@ -8,8 +8,6 @@ kubectl delete --wait=true -f $SCRIPT_DIR/flink
 helm uninstall grafana
 helm uninstall prometheus
 
-kubectl delete --wait=true hpa flink-taskmanager
-
 kubectl delete --wait=true job data-injector
 
 kubectl delete --wait=true deploy metrics-server -n kube-system
