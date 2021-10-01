@@ -1,0 +1,24 @@
+
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-flink-taskmanager
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: flink-taskmanager
+  minReplicas: 1
+  maxReplicas: 15
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 30
+        type: Utilization
+    type: Resource
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 0 
+    scaleUp:
+      stabilizationWindowSeconds: 0

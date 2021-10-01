@@ -22,16 +22,17 @@ export VVP_NAMESPACE="reactive"
 install_prometheus() {
   helm_install prometheus prometheus "$VVP_NAMESPACE" \
     --repo https://prometheus-community.github.io/helm-charts \
-    --values $SCRIPT_DIR/values-prometheus.yaml
+    --values $SCRIPT_DIR/../monitoring/values-prometheus.yaml
 }
 
 install_grafana() {
   helm_install grafana grafana "$VVP_NAMESPACE" \
     --repo https://grafana.github.io/helm-charts \
-    --values $SCRIPT_DIR/values-grafana.yaml \
-    --set-file dashboards.default.flink-dashboard.json=$SCRIPT_DIR/grafana-dashboard.json
+    --values $SCRIPT_DIR/../monitoring/values-grafana.yaml \
+    --set-file dashboards.default.flink-dashboard.json=$SCRIPT_DIR/../monitoring/grafana-dashboard.json
 }
 
+helm uninstall prometheus
 install_prometheus
 
 helm uninstall grafana
